@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Catálogo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      background-color: #141414;
+      color: white;
+    }
+
+    header {
+      padding: 20px;
+      text-align: center;
+      background-color: #000;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+    }
+
+    .filters {
+      margin-top: 15px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    input#search, select#typeFilter {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      margin: 10px;
+      width: 250px;
+      background-color: #222;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: transform 0.3s;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+    }
+
+    .card-content {
+      padding: 10px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .genre, .type {
+      font-size: 14px;
+      color: #bbb;
+      margin-top: 5px;
+    }
+
+    .description {
+      font-size: 14px;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎥 Mi Catálogo</h1>
+    <div class="filters">
+      <input type="text" id="search" placeholder="Buscar por título..." />
+      <select id="typeFilter">
+        <option value="todos">Todos</option>
+        <option value="película">Películas</option>
+        <option value="serie">Series</option>
+        <option value="anime">Animes</option>
+        <option value="novela">Novelas</option>
+        <option value="documental">Documentales</option>
+      </select>
+    </div>
+  </header>
+
+  <main id="catalog">
+    <!-- 🔽 DUPLICA ESTE BLOQUE PARA AGREGAR MÁS CONTENIDO -->
+    <div class="card" data-title="Matrix" data-genre="Ciencia ficción" data-type="película">
+      <img src="https://via.placeholder.com/250x350?text=Matrix" alt="Matrix" />
+      <div class="card-content">
+        <h2>Matrix</h2>
+        <div class="genre">Ciencia ficción</div>
+        <div class="type">Película</div>
+        <div class="description">Un hacker descubre la verdad sobre su realidad y su papel en la guerra contra sus controladores.</div>
+      </div>
+    </div>
+
+    <div class="card" data-title="one piece" data-genre="aventura" data-type="anime">
+      <img src="C:\Miche\Imagenes\! Wallpapers [HD]\790577.png" alt="One piece"/>
+      <div class="card-content">
+        <h2>One piece</h2>
+        <div class="genre">aventura</div>
+        <div class="type">Anime</div>
+        <div class="description">el verdadero tanq</div>          
+      </div>
+    </div>
+
+    <div class="card" data-title="Naruto" data-genre="Acción" data-type="anime">
+      <img src="https://via.placeholder.com/250x350?text=Naruto" alt="Naruto" />
+      <div class="card-content">
+        <h2>Naruto</h2>
+        <div class="genre">Acción</div>
+        <div class="type">Anime</div>
+        <div class="description">Un joven ninja busca reconocimiento y sueña con convertirse en el líder de su aldea.</div>
+      </div>
+    </div>
+
+    <div class="card" data-title="Breaking Bad" data-genre="Drama" data-type="serie">
+      <img src="https://via.placeholder.com/250x350?text=Breaking+Bad" alt="Breaking Bad" />
+      <div class="card-content">
+        <h2>Breaking Bad</h2>
+        <div class="genre">Drama</div>
+        <div class="type">Serie</div>
+        <div class="description">Un profesor de química se convierte en fabricante de metanfetamina para asegurar el futuro de su familia.</div>
+      </div>
+    </div>
+
+    <!-- 🔼 AGREGA MÁS BLOQUES AQUÍ -->
+  </main>
+
+  <script>
+    const searchInput = document.getElementById('search');
+    const typeFilter = document.getElementById('typeFilter');
+    const cards = document.querySelectorAll('.card');
+
+    function applyFilters() {
+      const query = searchInput.value.toLowerCase();
+      const selectedType = typeFilter.value;
+
+      cards.forEach(card => {
+        const title = card.dataset.title.toLowerCase();
+        const type = card.dataset.type.toLowerCase();
+        const matchesTitle = title.includes(query);
+        const matchesType = selectedType === 'todos' || type === selectedType;
+
+        card.style.display = matchesTitle && matchesType ? 'flex' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    typeFilter.addEventListener('change', applyFilters);
+  </script>
+</body>
+</html>

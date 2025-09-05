@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>StreamZone – Admin Editar/Eliminar</title>
+  <style>
+    :root {
+      --bg: #141414;
+      --text: #fff;
+      --header-bg: #000;
+      --card-bg: #1e1e1e;
+      --card-hover: #2a2a2a;
+      --shadow: 0 4px 12px rgba(0,0,0,0.3);
+      --btn-bg: #e50914;
+      --btn-hover: #f40612;
+    }
+    body.light-mode {
+      --bg: #f5f5f5;
+      --text: #111;
+      --header-bg: #fff;
+      --card-bg: #fff;
+      --card-hover: #e0e0e0;
+      --shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background .3s, color .3s;
+    }
+    header {
+      background: var(--header-bg);
+      padding: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2em;
+      color: var(--btn-bg);
+    }
+    #controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    #controls input[type="search"],
+    #controls select {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 1em;
+      outline: none;
+    }
+    #controls button {
+      background: var(--btn-bg);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .2s;
+      font-size: 1em;
+    }
+    #controls button:hover {
+      background: var(--btn-hover);
+    }
+    main {
+      padding: 20px;
+    }
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .item {
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: background .3s;
+      display: flex;
+      gap: 15px;
+      position: relative;
+    }
+    .item:hover {
+      background: var(--card-hover);
+    }
+    .item img {
+      width: 120px;
+      object-fit: cover;
+    }
+    .item-content {
+      padding: 10px;
+      flex: 1;
+    }
+    .item-content h3 {
+      margin: 0 0 6px;
+      font-size: 1.2em;
+    }
+    .item-content p.descripcion {
+      margin: 6px 0;
+      font-size: .9em;
+      color: #ccc;
+    }
+    .badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: .75em;
+      color: #fff;
+    }
+    .badge.Nuevo           { background: #e50914; }
+    .badge.Popular         { background: #f5a623; }
+    .badge.Recomendado     { background: #0073e6; }
+    .badge.Terror          { background: #8b0000; }
+    .badge.Acción          { background: #ff4500; }
+    .badge.Aventura        { background: #ffa500; }
+    .badge.Ficcion         { background: #4b0082; }
+    .badge.Misterio        { background: #6a5acd; }
+    .badge.Comedia         { background: #ffd700; }
+    .badge.Romance         { background: #ff1493; }
+
+    .pagination {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .pagination button {
+      margin: 0 5px;
+      padding: 6px 10px;
+      border: none;
+      background: var(--btn-bg);
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .pagination button:hover {
+      background: var(--btn-hover);
+    }
+
+    body.admin-mode .eliminar-btn {
+      display: block;
+    }
+    .eliminar-btn {
+      position: absolute;
+      top: 8px; right: 8px;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      border: none;
+      padding: 4px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: none;
+    }
+
+    /* Panel de admin */
+    .admin-panel {
+      position: fixed;
+      top: 80px; right: 20px;
+      width: 320px;
+      background: var(--card-bg);
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 10;
+      transition: background .3s;
+    }
+    .admin-panel h2 {
+      margin-top: 0;
+      font-size: 1.2em;
+      color: var(--btn-bg);
+    }
+    .admin-panel input,
+    .admin-panel select,
+    .admin-panel textarea {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 8px;
+      border: none;
+      border-radius: 4px;
+      background: #333;
+      color: #fff;
+      font-size: 1em;
+    }
+    .admin-panel textarea {
+      resize: vertical;
+      height: 60px;
+    }
+    .admin-panel .genre-options,
+    .admin-panel .tag-options {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .admin-panel label {
+      font-size: .85em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    /* Lista de items en admin */
+    #adminList {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      border: 1px solid #444;
+      padding: 8px;
+      border-radius: 4px;
+      background: #222;
+    }
+    #adminList .admin-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: .9em;
+    }
+    #adminList button {
+      background: transparent;
+      border: none;
+      color: #e50914;
+      cursor: pointer;
+      font-size: .9em;
+      margin-left: 4px;
+    }
+    #adminList button.edit {
+      color: #ffd700;
+    }
+
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: stretch; }
+      .item { flex-direction: column; align-items: center; }
+      .item img { width: 100%; }
+      .admin-panel { width: 90%; right: 5%; top: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>StreamZone</h1>
+    <div id="controls">
+      <input list="sugerencias" type="search" id="buscador"
+             placeholder="Buscar título…" oninput="renderizar()">
+      <datalist id="sugerencias"></datalist>
+
+      <select id="filtroGeneroDropdown" onchange="renderizar()">
+        <option value="">Todos los géneros</option>
+        <option value="Película">Película</option>
+        <option value="Serie">Serie</option>
+        <option value="Animado">Animado</option>
+        <option value="Novela">Novela</option>
+        <option value="Documental">Documental</option>
+        <option value="Drama">Drama</option>
+        <option value="Coreano">Coreano</option>
+      </select>
+
+      <button id="modeToggle" onclick="toggleModo()">🌙</button>
+      <button id="openAdmin" onclick="pedirClave()">🛠️ Admin</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="catalogo">
+      <div class="item-list" id="itemList"></div>
+      <div class="pagination">
+        <button onclick="cambiarPagina(-1)">Anterior</button>
+        <span id="pageInfo">Página 1</span>
+        <button onclick="cambiarPagina(1)">Siguiente</button>
+      </div>
+    </section>
+
+    <section class="admin-panel" id="adminPanel">
+      <h2>Admin Panel</h2>
+
+      <!-- Lista de contenidos con Editar/Eliminar -->
+      <div id="adminList"></div>
+
+      <!-- Formulario de editar/agregar -->
+      <input type="text" id="nuevoTitulo" placeholder="Título">
+      <input type="url" id="nuevaImagen" placeholder="URL de imagen">
+      <select id="nuevaCategoria">
+        <option value="Película">Película</option>
+        <option value="Serie">Serie</option>
+        <option value="Animado">Animado</option>
+        <option value="Novela">Novela</option>
+        <option value="Documental">Documental</option>
+        <option value="Drama">Drama</option>
+        <option value="Coreano">Coreano</option>
+      </select>
+      <textarea id="nuevaDescripcion" placeholder="Descripción (opcional)"></textarea>
+
+      <div class="genre-options">
+        <label><input type="checkbox" value="Terror"> Terror</label>
+        <label><input type="checkbox" value="Acción"> Acción</label>
+        <label><input type="checkbox" value="Aventura"> Aventura</label>
+        <label><input type="checkbox" value="Ficcion"> Ficcion</label>
+        <label><input type="checkbox" value="Misterio"> Misterio</label>
+        <label><input type="checkbox" value="Comedia"> Comedia</label>
+        <label><input type="checkbox" value="Romance"> Romance</label>
+      </div>
+
+      <div class="tag-options">
+        <label><input type="checkbox" value="Nuevo"> Nuevo</label>
+        <label><input type="checkbox" value="Popular"> Popular</label>
+        <label><input type="checkbox" value="Recomendado"> Recomendado</label>
+      </div>
+
+      <button id="btnGuardar" onclick="guardarContenido()">Agregar</button>
+      <button onclick="cerrarAdmin()">Cerrar</button>
+    </section>
+  </main>
+
+  <script>
+    const CLAVE = "admin123";
+    let adminActivo = false;
+    let items = [];
+    let editingId = null;
+
+    function loadItems() {
+      const guardado = localStorage.getItem("streamzone_items");
+      if (guardado) {
+        items = JSON.parse(guardado);
+      } else {
+        items = [
+          { id:1, title:"El Gran Escape", category:"Película",
+            description:"Acción y aventura en la Segunda Guerra Mundial.",
+            tags:["Nuevo"], img:"https://via.placeholder.com/120x180?text=Escape" },
+          { id:2, title:"Misterios del Tiempo", category:"Serie",
+            description:"Viajes temporales y paradojas.", tags:["Popular"],
+            img:"https://via.placeholder.com/120x180?text=Misterios" },
+          { id:3, title:"Aventuras Mágicas", category:"Animado",
+            description:"Criaturas fantásticas y magia.", tags:["Recomendado"],
+            img:"https://via.placeholder.com/120x180?text=Aventuras" },
+          { id:4, title:"La verdad desnuda", category:"Documental",
+            description:"Un recorrido por los grandes enigmas de la ciencia.",
+            tags:[], img:"https://via.placeholder.com/120x180?text=Documental" }
+        ];
+        saveItems();
+      }
+    }
+
+    function saveItems() {
+      localStorage.setItem("streamzone_items", JSON.stringify(items));
+    }
+
+    let currentPage = 1, perPage = 6;
+
+    function toggleModo() {
+      document.body.classList.toggle("light-mode");
+      document.getElementById("modeToggle").textContent =
+        document.body.classList.contains("light-mode") ? "🌞" : "🌙";
+    }
+
+    function renderizar() {
+      const texto = document.getElementById("buscador").value.toLowerCase();
+      const genero = document.getElementById("filtroGeneroDropdown").value;
+      const sugerencias = document.getElementById("sugerencias");
+      sugerencias.innerHTML = "";
+      items.forEach(it => {
+        let opt = document.createElement("option");
+        opt.value = it.title;
+        sugerencias.appendChild(opt);
+      });
+
+      let filtrados = items.filter(it =>
+        it.title.toLowerCase().includes(texto) &&
+        (!genero || it.category === genero)
+      );
+
+      const totalPages = Math.max(1, Math.ceil(filtrados.length / perPage));
+      currentPage = Math.min(Math.max(1, currentPage), totalPages);
+      const start = (currentPage - 1) * perPage;
+      const pageItems = filtrados.slice(start, start + perPage);
+
+      const listEl = document.getElementById("itemList");
+      listEl.innerHTML = "";
+      pageItems.forEach(it => {
+        const card = document.createElement("div");
+        card.className = "item";
+        card.innerHTML = `
+          <img src="${it.img}" alt="${it.title}">
+          <div class="item-content">
+            <h3>${icono(it.category)} ${it.title}</h3>
+            ${it.description ? `<p class="descripcion">${it.description}</p>` : ""}
+            <div class="badges">
+              ${it.tags.map(tag => `<span class="badge ${tag}">${tag}</span>`).join("")}
+            </div>
+          </div>
+          <button class="eliminar-btn" onclick="confirmarEliminar(${it.id})">❌</button>
+        `;
+        listEl.appendChild(card);
+      });
+
+      document.getElementById("pageInfo").textContent =
+        `Página ${currentPage} de ${totalPages}`;
+    }
+
+    function icono(cat) {
+      const icons = {
+        Película: "🎬", Serie: "📺", Animado: "🐉",
+        Novela: "📖", Documental: "🎥", Drama: "🎭", Coreano: "🇰🇷"
+      };
+      return icons[cat] || "";
+    }
+
+    function cambiarPagina(delta) {
+      currentPage += delta;
+      renderizar();
+    }
+
+    function pedirClave() {
+      if (adminActivo) return abrirAdminPanel();
+      const clave = prompt("Clave de administrador:");
+      if (clave === CLAVE) {
+        adminActivo = true;
+        abrirAdminPanel();
+      } else {
+        alert("Clave incorrecta");
+      }
+    }
+
+    function abrirAdminPanel() {
+      document.body.classList.add("admin-mode");
+      document.getElementById("adminPanel").style.display = "block";
+      document.getElementById("openAdmin").style.display = "none";
+      mostrarAdminList();
+    }
+
+    function cerrarAdmin() {
+      document.getElementById("adminPanel").style.display = "none";
+      document.body.classList.remove("admin-mode");
+      adminActivo = false;
+      editingId = null;
+      document.getElementById("btnGuardar").textContent = "Agregar";
+      document.getElementById("openAdmin").style.display = "inline-block";
+      limpiarFormulario();
+    }
+
+    function mostrarAdminList() {
+      const list = document.getElementById("adminList");
+      list.innerHTML = "";
+      items.forEach(it => {
+        const row = document.createElement("div");
+        row.className = "admin-item";
+        row.innerHTML = `
+          <span>${it.title}</span>
+          <div>
+            <button class="edit" onclick="editarContenido(${it.id})">✏️</button>
+            <button onclick="confirmarEliminar(${it.id})">🗑️</button>
+          </div>
+        `;
+        list.appendChild(row);
+      });
+    }
+
+    function editarContenido(id) {
+      const it = items.find(x => x.id === id);
+      if (!it) return;
+      editingId = id;
+      document.getElementById("nuevoTitulo").value = it.title;
+      document.getElementById("nuevaImagen").value = it.img;
+      document.getElementById("nuevaCategoria").value = it.category;
+      document.getElementById("nuevaDescripcion").value = it.description;
+      // Desmarcar todos y luego marcar los tags del item
+      document.querySelectorAll(
+        "#adminPanel input[type='checkbox']"
+      ).forEach(cb => cb.checked = it.tags.includes(cb.value));
+      document.getElementById("btnGuardar").textContent = "Guardar cambios";
+    }
+
+    function guardarContenido() {
+      const titulo = document.getElementById("nuevoTitulo").value.trim();
+      if (!titulo) return alert("El título es obligatorio.");
+      const imgURL = document.getElementById("nuevaImagen").value.trim() ||
+                     "https://via.placeholder.com/120x180?text=Sin+Imagen";
+      const cat = document.getElementById("nuevaCategoria").value;
+      const desc = document.getElementById("nuevaDescripcion").value.trim();
+      const tags = Array.from(
+        document.querySelectorAll("#adminPanel input[type='checkbox']:checked")
+      ).map(cb => cb.value);
+
+      if (editingId) {
+        // Actualizar existente
+        const idx = items.findIndex(x => x.id === editingId);
+        items[idx] = { id: editingId,
+                       title: titulo,
+                       category: cat,
+                       description: desc,
+                       tags, img: imgURL };
+      } else {
+        // Agregar nuevo
+        items.push({
+          id: Date.now(),
+          title: titulo,
+          category: cat,
+          description: desc,
+          tags,
+          img: imgURL
+        });
+      }
+
+      saveItems();
+      renderizar();
+      mostrarAdminList();
+      limpiarFormulario();
+      editingId = null;
+      document.getElementById("btnGuardar").textContent = "Agregar";
+    }
+
+    function confirmarEliminar(id) {
+      if (!confirm("¿Seguro que quieres eliminar este contenido?")) return;
+      items = items.filter(it => it.id !== id);
+      saveItems();
+      renderizar();
+      if (adminActivo) mostrarAdminList();
+    }
+
+    function limpiarFormulario() {
+      document.getElementById("nuevoTitulo").value = "";
+      document.getElementById("nuevaImagen").value = "";
+      document.getElementById("nuevaDescripcion").value = "";
+      document.querySelectorAll(
+        "#adminPanel input[type='checkbox']"
+      ).forEach(cb => cb.checked = false);
+    }
+
+    // Inicialización
+    loadItems();
+    renderizar();
+  </script>
+</body>
+</html>
